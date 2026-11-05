@@ -33,6 +33,7 @@ import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionResult
 import androidx.media3.session.SessionError
 import com.android.purebilibili.R
+import com.android.purebilibili.feature.video.player.sessionArtworkUri
 import com.android.purebilibili.core.network.NetworkModule
 import com.android.purebilibili.core.player.SharedPlaybackRepository
 import com.android.purebilibili.core.player.SharedPlaybackRequest
@@ -429,7 +430,7 @@ class BackgroundAudioService : MediaLibraryService() {
         MediaItem.Builder().setMediaId("${entry.bvid}:${entry.cid}").setUri(url)
             .setMediaMetadata(MediaMetadata.Builder().setTitle(entry.title).setArtist(entry.owner)
                 .setIsBrowsable(false).setIsPlayable(true).setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC)
-                .setArtworkUri(entry.cover.takeIf { it.isNotBlank() }?.let { android.net.Uri.parse(if (it.startsWith("//")) "https:$it" else it) })
+                .setArtworkUri(entry.cover.takeIf { it.isNotBlank() }?.let { sessionArtworkUri(it) })
                 .setExtras(Bundle().apply {
                     putInt("queue_index", index); putString("bvid", entry.bvid); putLong("cid", entry.cid)
                     putString("cover", entry.cover)

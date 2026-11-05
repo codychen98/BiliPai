@@ -1,0 +1,47 @@
+name: Dev APK
+
+# Forks do not receive the upstream FCM or release-signing secrets, so the
+# main Build workflow skips the APK. This job produces an installable dev APK.
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: dev-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  assemble-dev:
+    name: Assemble dev APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Accept Android SDK licenses
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+
+      - name: Build dev APK
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          chmod +x gradlew
+          ./gradlew --max-workers=4 assembleDev
+
+      - name: Upload dev APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BiliPai-dev
+          path: app/build/outputs/bilipai/dev/*.apk
+          retention-days: 14
+          if-no-files-found: error

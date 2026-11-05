@@ -2373,7 +2373,7 @@ class MiniPlayerManager private constructor(private val context: Context) :
             .setIsPlayable(true)
             .apply {
                 if (cover.isNotBlank()) {
-                    setArtworkUri(Uri.parse(FormatUtils.fixImageUrl(cover)))
+                    setArtworkUri(sessionArtworkUri(cover))
                 }
             }
             .build()
@@ -3281,7 +3281,7 @@ class MiniPlayerManager private constructor(private val context: Context) :
             .setDisplayTitle(title)
             .setIsPlayable(true)
         if (effectiveCoverUrl.isNotBlank()) {
-            metadataBuilder.setArtworkUri(Uri.parse(FormatUtils.fixImageUrl(effectiveCoverUrl)))
+            metadataBuilder.setArtworkUri(sessionArtworkUri(effectiveCoverUrl))
         }
         val metadata = metadataBuilder.build()
 
