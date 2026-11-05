@@ -1,7 +1,8 @@
 name: Dev APK
 
 # Forks do not receive the upstream FCM or release-signing secrets, so the
-# main Build workflow skips the APK. This job produces an installable dev APK.
+# main Build workflow skips the APK. This job produces an installable APK
+# with the debug keystore and without R8, so cold CI builds finish sooner.
 on:
   push:
   workflow_dispatch:
@@ -15,9 +16,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  assemble-dev:
-    name: Assemble dev APK
+  assemble-smooth:
+    name: Assemble smooth APK
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -31,17 +33,17 @@ jobs:
       - name: Accept Android SDK licenses
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
 
-      - name: Build dev APK
+      - name: Build smooth APK
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           chmod +x gradlew
-          ./gradlew --max-workers=4 assembleDev
+          ./gradlew --max-workers=4 assembleSmooth
 
-      - name: Upload dev APK
+      - name: Upload smooth APK
         uses: actions/upload-artifact@v4
         with:
-          name: BiliPai-dev
-          path: app/build/outputs/bilipai/dev/*.apk
+          name: BiliPai-smooth
+          path: app/build/outputs/bilipai/smooth/*.apk
           retention-days: 14
           if-no-files-found: error

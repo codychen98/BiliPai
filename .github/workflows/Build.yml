@@ -31,6 +31,8 @@ env:
 jobs:
   quality-guards:
     name: Quality checks
+    # Forks lack FCM/signing secrets; use the Dev APK workflow there instead.
+    if: github.repository == 'jay3-yy/BiliPai'
     uses: ./.github/workflows/QualityChecks.yml
     permissions:
       contents: read
@@ -38,6 +40,7 @@ jobs:
 
   check-fcm:
     runs-on: ubuntu-latest
+    if: github.repository == 'jay3-yy/BiliPai'
     outputs:
       has_fcm: ${{ steps.check.outputs.has_fcm }}
     steps:
@@ -55,7 +58,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: [quality-guards, check-fcm]
-    if: needs.check-fcm.outputs.has_fcm == 'true'
+    if: github.repository == 'jay3-yy/BiliPai' && needs.check-fcm.outputs.has_fcm == 'true'
     env:
       NATIVE_TARGET: "arm64-v8a"
     steps:
@@ -303,7 +306,7 @@ jobs:
   skipped-due-to-no-fcm:
     runs-on: ubuntu-latest
     needs: check-fcm
-    if: needs.check-fcm.outputs.has_fcm == 'false'
+    if: github.repository == 'jay3-yy/BiliPai' && needs.check-fcm.outputs.has_fcm == 'false'
     steps:
       - name: Workflow Skipped
         run: |
