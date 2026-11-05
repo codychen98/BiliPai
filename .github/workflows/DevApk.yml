@@ -2,8 +2,8 @@ name: Dev APK
 
 # Forks do not receive the upstream FCM or release-signing secrets, so the
 # main Build workflow skips the APK. This job builds the smooth variant
-# (debug-signed, no R8). Only release/dev are exported to outputs/bilipai,
-# so the artifact is taken from the AGP apk directory.
+# (debug-signed, no R8, same applicationId as release). Only release/dev are
+# exported to outputs/bilipai, so the artifact is taken from the AGP apk dir.
 on:
   push:
   workflow_dispatch:
@@ -31,6 +31,11 @@ jobs:
           distribution: temurin
           java-version: "21"
 
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+
       - name: Accept Android SDK licenses
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
 
@@ -39,7 +44,16 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           chmod +x gradlew
-          ./gradlew --max-workers=4 assembleSmooth
+          for attempt in 1 2 3; do
+            if ./gradlew --max-workers=4 assembleSmooth; then
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            echo "Gradle assembleSmooth failed on attempt $attempt; retrying..."
+            sleep $((attempt * 15))
+          done
           find app/build/outputs -type f -name '*.apk' -print
 
       - name: Upload smooth APK
