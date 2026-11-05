@@ -228,11 +228,12 @@ android {
             matchingFallbacks += listOf("release")
         }
         create("smooth") {
-            // Smooth 用于本地快速验证正式版运行语义：保留非 debug 行为，但跳过 R8/资源压缩。
+            // Smooth 用于快速验证正式版运行语义：保留非 debug 行为，跳过 R8，
+            // 并使用与正式版相同的 applicationId（com.android.purebilibili）。
+            // Debug 签名无法覆盖官方 release 签名安装包，需先卸载再装。
             initWith(getByName("release"))
-            applicationIdSuffix = ".dev"
             versionNameSuffix = "-smooth"
-            resValue("string", "app_name", "BiliPai Smooth")
+            resValue("string", "app_name", "BiliPai")
             buildConfigField("boolean", "ALLOW_HARDCODED_DNS_FALLBACK", "true")
             buildConfigField("boolean", "ENABLE_VERBOSE_DEBUG_LOGS", "false")
             buildConfigField("boolean", "ENABLE_VERBOSE_RUNTIME_LOG_PERSISTENCE", "false")

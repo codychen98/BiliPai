@@ -2372,8 +2372,8 @@ class MiniPlayerManager private constructor(private val context: Context) :
             .setDisplayTitle(title)
             .setIsPlayable(true)
             .apply {
-                if (cover.isNotBlank()) {
-                    setArtworkUri(sessionArtworkUri(cover))
+                if (cover.isNotBlank() && shouldAttachMediaSessionArtwork()) {
+                    setArtworkUri(Uri.parse(FormatUtils.fixImageUrl(cover)))
                 }
             }
             .build()
@@ -3281,7 +3281,9 @@ class MiniPlayerManager private constructor(private val context: Context) :
             .setDisplayTitle(title)
             .setIsPlayable(true)
         if (effectiveCoverUrl.isNotBlank()) {
-            metadataBuilder.setArtworkUri(sessionArtworkUri(effectiveCoverUrl))
+            if (shouldAttachMediaSessionArtwork()) {
+                metadataBuilder.setArtworkUri(Uri.parse(FormatUtils.fixImageUrl(effectiveCoverUrl)))
+            }
         }
         val metadata = metadataBuilder.build()
 

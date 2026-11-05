@@ -1,15 +1,17 @@
 package com.android.purebilibili.feature.audio.player
 
 import android.content.Context
+import android.net.Uri
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import com.android.purebilibili.R
 import com.android.purebilibili.core.store.MultiProcessPreferences
 import com.android.purebilibili.core.store.TokenManager
+import com.android.purebilibili.core.util.FormatUtils
 import com.android.purebilibili.data.repository.WatchLaterRepository
 import com.android.purebilibili.feature.video.player.PlaylistItem
-import com.android.purebilibili.feature.video.player.sessionArtworkUri
+import com.android.purebilibili.feature.video.player.shouldAttachMediaSessionArtwork
 import kotlinx.coroutines.flow.first
 
 /** 系统媒体目录只暴露内容身份；播放地址由音频服务按当前账号重新获取。 */
@@ -63,7 +65,10 @@ internal class AudioMediaLibrary(private val context: Context) {
     fun item(parent: String, entry: PlaylistItem): MediaItem = MediaItem.Builder()
         .setMediaId("$parent/${entry.bvid}:${entry.cid}")
         .setMediaMetadata(MediaMetadata.Builder().setTitle(entry.title).setArtist(entry.owner)
-            .setArtworkUri(entry.cover.takeIf { it.isNotBlank() }?.let { sessionArtworkUri(it) })
+            .setArtworkUri(
+                entry.cover.takeIf { it.isNotBlank() && shouldAttachMediaSessionArtwork() }
+                    ?.let { Uri.parse(FormatUtils.fixImageUrl(it)) }
+            )
             .setIsBrowsable(false).setIsPlayable(true).setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC).build())
         .build()
 

@@ -94,6 +94,10 @@ BiliPai_BusinessCode_Backup/
 # Local icon references used during UI icon planning
 /icons/
 
+# Local crash dumps and planning notes; never commit device logs.
+roadmap/
+**/roadmap/
+
 # Docs / plans should not be pushed
 docs/
 **/docs/

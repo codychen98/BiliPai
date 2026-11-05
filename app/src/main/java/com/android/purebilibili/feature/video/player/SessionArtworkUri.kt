@@ -1,23 +1,13 @@
 package com.android.purebilibili.feature.video.player
 
-import android.net.Uri
-import com.android.purebilibili.core.util.FormatUtils
-import java.util.concurrent.atomic.AtomicLong
-
-private val sessionArtworkGeneration = AtomicLong()
-
 /**
- * Media3 caches the last session artwork bitmap and reuses that instance.
- * Some Android builds recycle it inside MediaMetadata.Builder.scaleBitmap, so the
- * next metadata update crashes with "cannot use a recycled source in createBitmap".
- * A new fragment forces a new bitmap. The fragment is not part of the image request.
+ * Media3 wraps every session [androidx.media3.common.util.BitmapLoader] with
+ * SizeLimitedBitmapLoader(makeShared = true) and CacheBitmapLoader. On some OEM
+ * builds (OxygenOS / Android 15 observed), MediaMetadata.Builder.scaleBitmap then
+ * recycles that shared bitmap, and the next metadata publish crashes with
+ * "cannot use a recycled source in createBitmap".
+ *
+ * Session metadata therefore omits artwork. Notification large icons still load
+ * through Coil in MiniPlayerManager and do not go through MediaSession.setMetadata.
  */
-fun sessionArtworkUri(
-    coverUrl: String,
-    generation: Long = sessionArtworkGeneration.incrementAndGet(),
-): Uri = Uri.parse(sessionArtworkUriString(coverUrl, generation))
-
-fun sessionArtworkUriString(coverUrl: String, generation: Long): String {
-    val fixed = FormatUtils.fixImageUrl(coverUrl).substringBefore('#')
-    return "$fixed#bilipai-art-$generation"
-}
+fun shouldAttachMediaSessionArtwork(): Boolean = false
