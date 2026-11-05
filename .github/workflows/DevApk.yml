@@ -1,8 +1,9 @@
 name: Dev APK
 
 # Forks do not receive the upstream FCM or release-signing secrets, so the
-# main Build workflow skips the APK. This job produces an installable APK
-# with the debug keystore and without R8, so cold CI builds finish sooner.
+# main Build workflow skips the APK. This job builds the smooth variant
+# (debug-signed, no R8). Only release/dev are exported to outputs/bilipai,
+# so the artifact is taken from the AGP apk directory.
 on:
   push:
   workflow_dispatch:
@@ -39,11 +40,12 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew --max-workers=4 assembleSmooth
+          find app/build/outputs -type f -name '*.apk' -print
 
       - name: Upload smooth APK
         uses: actions/upload-artifact@v4
         with:
           name: BiliPai-smooth
-          path: app/build/outputs/bilipai/smooth/*.apk
+          path: app/build/outputs/apk/smooth/**/*.apk
           retention-days: 14
           if-no-files-found: error
